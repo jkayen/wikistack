@@ -24,6 +24,9 @@ var Page = db.define('page', {
           type: Sequelize.DATE,
           defaultValue: Sequelize.NOW
     }
+    // getterMethods: {
+    //     route: function() {return '/wiki/' + this.urlTitle.type}
+    // }
 });
 
 var User = db.define('user', {

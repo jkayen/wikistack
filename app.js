@@ -17,6 +17,7 @@ app.engine('html', nunjucks.render);
 // MIDDLEWARES
 app.use(express.static(path.join(__dirname, '/public')));
 
+app.use('/wiki', require('./routes/wiki.js'))
 
 
 //MODEL SYNC
@@ -25,7 +26,7 @@ models.User.sync({})
     return models.Page.sync({})
 })
 .then(function () {
-    server.listen(3000, function () {
+    app.listen(3000, function () {
         console.log('Server is listening on port 3000!');
     });
 })
