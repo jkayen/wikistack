@@ -1,5 +1,6 @@
 var Sequelize = require('sequelize');
 var db = new Sequelize('postgres://localhost:5432/wikistack2');
+var marked = require('marked');
 
 var Page = db.define('page', {
   title: {
@@ -16,6 +17,16 @@ var Page = db.define('page', {
   },
   status: {
     type: Sequelize.ENUM('open', 'closed')
+  },
+  tags: {
+    type: Sequelize.ARRAY(Sequelize.TEXT),
+    set: function (value) {
+      var arrayOfTags;
+      if (typeof value === 'string') {
+        arrayOfTags = value.split(',').map(s => s.trim());
+        this.setDataValue('tags', arrayOfTags);
+      } else this.setDataValue('tags', arrayOfTags);
+    }
   }
 }, {
   hooks: {
@@ -23,6 +34,39 @@ var Page = db.define('page', {
       if (page.title) {
         page.urlTitle = page.title.replace(/\s+/g, '_').replace(/\W/g, '');
       }
+    }
+  },
+  getterMethods: {
+    route: function () {
+      return '/wiki/' + this.urlTitle;
+    },
+    renderedContent: function () {
+      return marked(this.content);
+    }
+  },
+  classMethods: {
+    findByTag: function (tag) {
+      return Page.findAll({
+        where: {
+          tags: {
+            $overlap: [tag]
+          }
+        }
+      });
+    }
+  },
+  instanceMethods: {
+    findSimilar: function () {
+      return Page.findAll({
+        where: {
+          tags: {
+            $overlap: this.tags
+          },
+          id: {
+            $ne: this.id
+          }
+        }
+      })
     }
   }
 });
@@ -41,6 +85,8 @@ var User =db.define('user', {
     }
   }
 });
+
+Page.belongsTo(User, { as: 'author' });
 
 module.exports = {
   Page: Page,

@@ -9,6 +9,7 @@ var User = models.User;
 
 var app = express();
 var wikiRouter = require('./routes/wiki');
+var usersRouter = require('./routes/users')
 
 app.engine('html', swig.renderFile);
 swig.setDefaults({ cache: false });
@@ -24,6 +25,7 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/node_modules'));
 
 app.use('/wiki', wikiRouter); //allows routes to refer to '/' instead of 'wiki'.
+app.use('/users', usersRouter);
 
 app.get('/', function (req, res) {
   res.render('index');
